@@ -2,19 +2,19 @@
 
 <p align="center">
   <b>A Rust-based Minecraft: Java Edition compatible game project.</b><br>
-  Donorcraft is a community rebrand and independent build based on the open-source Horizon project.
+  Donorcraft is a community rebrand maintained by Donor and based on the open-source Horizon project.
 </p>
 
 <p align="center">
-  <a href="https://playhorizon.dev/download"><img src="docs/media/readme/download-button.png" alt="Donorcraft launcher download" width="400"></a><br>
-  <sub>You need your own copy of Minecraft: Java Edition.</sub>
+  <b>Donorcraft builds are not published yet.</b><br>
+  <sub>When releases are available, they will be listed on this repository. You need your own copy of Minecraft: Java Edition.</sub>
 </p>
 
 <p align="center">
-  <a href="https://playhorizon.dev/docs/install"><b>Install guide</b></a> ·
-  <a href="https://playhorizon.dev/docs/"><b>Docs</b></a> ·
-  <a href="https://playhorizon.dev/mods"><b>Mods</b></a> ·
-  <a href="https://discord.gg/playhorizon"><b>Discord</b></a>
+  <a href="https://playhorizon.dev/docs/install"><b>Upstream install guide</b></a> ·
+  <a href="https://playhorizon.dev/docs/"><b>Upstream docs</b></a> ·
+  <a href="https://playhorizon.dev/mods"><b>Upstream mods</b></a> ·
+  <a href="https://discord.gg/playhorizon"><b>Upstream Discord</b></a>
 </p>
 
 <p align="center">
