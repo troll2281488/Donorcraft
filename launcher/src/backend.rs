@@ -6172,7 +6172,7 @@ pub fn {f}("
             {"tag_name": "v2026.10.21", "prerelease": true, "assets": [{"name": asset, "browser_download_url": "d", "size": 1}]},
             {"tag_name": "v2026.10.19.15", "assets": [{"name": asset, "browser_download_url": "s", "size": 1}]},
         ]);
-        let releases = parse_releases(&list, Some(asset), is_game_tag);
+        let releases = parse_releases(&list, Some(asset), GAME_REPO, is_game_tag);
         let installed = ["v2026.10.19.15".to_string(), "v2026.10.12".to_string()];
         // A pre-release 0.2.0 is not an update; once published as the release, it is one.
         let offered = |releases: &[Release]| {
