@@ -1,4 +1,4 @@
-//! Horizon: native Rust client for Minecraft Java Edition 26.3 gameplay.
+//! Donorcraft: native Rust client for Minecraft Java Edition 26.3 gameplay, based on Horizon.
 #![forbid(unsafe_code)]
 
 /// Identifies this executable as the game for launcher imports. `main` reads it so the
