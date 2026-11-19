@@ -20,7 +20,7 @@ Donorcraft uses Horizon's built-in **Play with Friends** system. It does not req
 
 1. Start the same Donorcraft build.
 2. On the title screen, select **Friends**, then **Join a Friend** (or enter the full code through **Direct Connection**). The launcher Play page can also accept a friend code in builds that include that entry.
-3. Paste the invite code and connect.
+3. Paste the invite code and connect. The friend-code flow is in the game UI; the launcher itself does not currently have a dedicated friends/invite page.
 
 ## If the connection fails
 
