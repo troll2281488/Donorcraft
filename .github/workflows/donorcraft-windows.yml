@@ -79,7 +79,7 @@ jobs:
           shared-key: donorcraft-game-windows-x64
 
       - name: Build native Donorcraft game and companion tools
-        run: cargo build --release --locked -p horizon-official --bin horizon-official -p horizon-client-lib --bin horizon-ctl -p horizon-prepare --bin horizon-prepare -p horizon-server --bin horizon-server
+        run: cargo build --release --locked -p horizon-official --bin horizon-official -p horizon-client-lib --bin horizon-ctl -p horizon-prepare --bin horizon-prepare -p horizon-server --bin horizon-server -p horizon-relay --bin horizon-relay
 
       - name: Download shared WebAssembly standard library
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
@@ -92,14 +92,14 @@ jobs:
         run: |
           $bin = "target/release"
           Copy-Item "$bin/horizon-official.exe" "$bin/horizon-client.exe" -Force
-          $required = @("horizon-client.exe", "horizon-ctl.exe", "horizon-prepare.exe", "horizon-server.exe")
+          $required = @("horizon-client.exe", "horizon-ctl.exe", "horizon-prepare.exe", "horizon-server.exe", "horizon-relay.exe")
           foreach ($name in $required) {
             $path = Join-Path $bin $name
             if (!(Test-Path $path)) { throw "Missing game output: $path" }
           }
           if (!(Test-Path "wasm-std/horizon-wasm-std.wasm")) { throw "Missing shared wasm standard library" }
           New-Item -ItemType Directory -Force dist/Donorcraft-Windows-x64 | Out-Null
-          Copy-Item "$bin/horizon-client.exe", "$bin/horizon-ctl.exe", "$bin/horizon-prepare.exe", "$bin/horizon-server.exe" "dist/Donorcraft-Windows-x64/"
+          Copy-Item "$bin/horizon-client.exe", "$bin/horizon-ctl.exe", "$bin/horizon-prepare.exe", "$bin/horizon-server.exe", "$bin/horizon-relay.exe" "dist/Donorcraft-Windows-x64/"
           Copy-Item "wasm-std/horizon-wasm-std.wasm" "dist/Donorcraft-Windows-x64/"
           @"
           Donorcraft Windows x64 - preliminary native build
