@@ -6,8 +6,8 @@
 </p>
 
 <p align="center">
-  <b>Donorcraft builds are not published yet.</b><br>
-  <sub>When releases are available, they will be listed on this repository. You need your own copy of Minecraft: Java Edition.</sub>
+  <b>Donorcraft does not yet publish a separate game binary.</b><br>
+  <sub>The launcher is configured to install signed Windows/Linux/macOS game builds from the upstream Horizon releases. You still need your own Minecraft: Java Edition files.</sub>
 </p>
 
 <p align="center">
