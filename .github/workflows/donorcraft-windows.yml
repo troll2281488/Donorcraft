@@ -162,10 +162,34 @@ jobs:
           }
           Get-Item $exe | Format-List Name, Length, FullName
 
+      - name: Package portable Windows launcher
+        shell: pwsh
+        run: |
+          $package = "dist/Donorcraft-Launcher-Windows-x64"
+          New-Item -ItemType Directory -Force $package | Out-Null
+          Copy-Item "launcher/target/release/horizon-launcher.exe" "$package/DonorcraftLauncher.exe"
+          Copy-Item "launcher/README.md" "$package/README.txt"
+          @"
+          Donorcraft Launcher - Windows x64
+
+          This package contains the launcher application only.
+          It is not a game client and does not include Minecraft assets.
+          Donorcraft has not published a playable game release yet.
+          The launcher can open, but its Versions page will remain empty until
+          Donorcraft publishes compatible game builds on GitHub Releases.
+
+          Keep the README.txt with the executable. Do not download game files
+          from unofficial mirrors. Use only game files you are legally entitled to use.
+          "@ | Set-Content "$package/READ-ME-FIRST.txt"
+          Compress-Archive -Path "$package/*" -DestinationPath "dist/Donorcraft-Launcher-Windows-x64.zip" -Force
+          if (!(Test-Path "dist/Donorcraft-Launcher-Windows-x64.zip")) {
+            throw "Portable launcher archive was not created"
+          }
+
       - name: Upload Windows x64 artifact
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: Donorcraft-Launcher-Windows-x64
-          path: launcher/target/release/horizon-launcher.exe
+          path: dist/Donorcraft-Launcher-Windows-x64.zip
           if-no-files-found: error
           retention-days: 14
