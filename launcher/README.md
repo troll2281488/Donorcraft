@@ -1,9 +1,10 @@
 # Donorcraft launcher
 
-> **Development status:** the launcher can be built and opened, but this repository does not yet
-> publish a playable Donorcraft game build. Until a game build appears under GitHub Releases,
-> the Versions page has nothing to install and Play cannot start Donorcraft. The Windows CI ZIP
-> is a portable launcher preview, not a playable game or an installer.
+> **Development status:** this fork does not yet publish its own game binaries. The launcher fetches
+> signed playable game builds from the upstream `horizon-rust/horizon` Releases repository
+> (see `GAME_REPO` in `src/backend.rs`). The Windows CI ZIP is the launcher only, not a game
+> installer. Install a compatible upstream Nightly from Versions, then prepare it from your own
+> Minecraft: Java Edition installation before pressing Play.
 
 A small desktop app that installs Donorcraft builds, prepares them from your own copy of
 Minecraft, and starts the client or a dedicated server. Built with [GPUI Fast](https://github.com/longbridge/gpui-fast),
@@ -18,8 +19,8 @@ The opening, then Play ([clip](docs/opening.webm)):
 
 ## What it does
 
-- **Versions**: lists the published builds of Donorcraft (the current Nightly, the last
-  week's, then the releases from before), installs the build for this platform into its own
+- **Versions**: lists signed published builds from the configured game repository
+  (`horizon-rust/horizon`; current Nightly and older releases), installs the build for this platform into its own
   folder, and removes it again. **Import a game build…** takes a `horizon-client` you have (one
   built on your fork's Actions, or the zip holding it) and installs it as `imported-<date>-<sha>`:
   a copy of the selected release or Nightly's folder, game files included, with that program as the
