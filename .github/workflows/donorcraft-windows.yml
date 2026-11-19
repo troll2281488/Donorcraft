@@ -104,10 +104,15 @@ jobs:
           @"
           Donorcraft Windows x64 - preliminary native build
 
-          This artifact contains the native Rust game executable and companion tools.
-          It is not yet a ready-to-play installer: Minecraft game resources must be
-          prepared locally from a user's own legitimate Minecraft Java Edition copy.
-          No Minecraft-owned assets or game JARs are included in this artifact.
+          This is a compile-only, preliminary artifact. It is NOT a playable game or installer.
+          The upstream game build also requires the original-exporters artifact, generated
+          on a dedicated trusted macOS runner from locally installed Minecraft Java Edition
+          files. This workflow does not generate or download that artifact, so the game
+          cannot be considered launch-ready.
+
+          Minecraft game resources must be prepared locally from a user's own legitimate
+          Minecraft Java Edition copy. No Minecraft-owned assets, game JARs, or exporter
+          classes are included in this artifact. Do not distribute this as a working release.
           "@ | Set-Content "dist/Donorcraft-Windows-x64/BUILD-NOTES.txt"
 
       - name: Upload preliminary native game build
