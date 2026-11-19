@@ -8,6 +8,7 @@ on:
       - 'firebase.json'
       - 'firestore.rules'
       - 'storage.rules'
+      - 'tests/firebase-rules.test.mjs'
       - '.github/workflows/firebase-rules.yml'
 
 permissions:
@@ -19,9 +20,9 @@ concurrency:
 
 jobs:
   validate-rules:
-    name: Compile Firestore and Storage rules
+    name: Test Firestore and Storage security rules
     runs-on: ubuntu-22.04
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - name: Check out source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -39,9 +40,13 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Compile rules with Firebase emulators
+      - name: Install pinned Firebase test libraries
+        run: |
+          npm install --no-save --no-package-lock firebase@12.0.0 @firebase/rules-unit-testing@5.0.0
+
+      - name: Run emulator-backed security tests
         run: |
           npx --yes firebase-tools@14.22.0 emulators:exec \
             --project demo-donorcraft \
             --only firestore,storage \
-            "echo Firebase rules loaded successfully"
+            "node tests/firebase-rules.test.mjs"
