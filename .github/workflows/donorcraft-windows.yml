@@ -20,6 +20,78 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  build-game-windows-x64:
+    name: Build Donorcraft game client (Windows x64)
+    runs-on: windows-latest
+    timeout-minutes: 90
+    env:
+      RUSTFLAGS: -C target-feature=+crt-static
+      HORIZON_NO_AUDIO: "1"
+      HORIZON_TELEMETRY_URL: "off"
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - id: rust
+        name: Read pinned Rust version
+        shell: pwsh
+        run: |
+          "version=$(Get-Content tools/ci/rust-version -Raw | ForEach-Object { $_.Trim() })" >> $env:GITHUB_OUTPUT
+
+      - name: Install Rust and wasm target
+        uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec
+        with:
+          toolchain: ${{ steps.rust.outputs.version }}
+          components: rust-src
+          targets: wasm32-unknown-unknown
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          shared-key: donorcraft-game-windows-x64
+
+      - name: Build native Donorcraft game and companion tools
+        run: cargo build --release --locked -p horizon-official --bin horizon-official -p horizon-client-lib --bin horizon-ctl -p horizon-prepare --bin horizon-prepare -p horizon-server --bin horizon-server
+
+      - name: Build shared WebAssembly standard library
+        run: |
+          New-Item -ItemType Directory -Force wasm-std | Out-Null
+          cargo run --locked -p cargo-horizon-mod -- wasm-std wasm-std/horizon-wasm-std.wasm
+        shell: pwsh
+
+      - name: Prepare game executable and verify outputs
+        shell: pwsh
+        run: |
+          $bin = "target/release"
+          Copy-Item "$bin/horizon-official.exe" "$bin/horizon-client.exe" -Force
+          $required = @("horizon-client.exe", "horizon-ctl.exe", "horizon-prepare.exe", "horizon-server.exe")
+          foreach ($name in $required) {
+            $path = Join-Path $bin $name
+            if (!(Test-Path $path)) { throw "Missing game output: $path" }
+          }
+          if (!(Test-Path "wasm-std/horizon-wasm-std.wasm")) { throw "Missing shared wasm standard library" }
+          New-Item -ItemType Directory -Force dist/Donorcraft-Windows-x64 | Out-Null
+          Copy-Item "$bin/horizon-client.exe", "$bin/horizon-ctl.exe", "$bin/horizon-prepare.exe", "$bin/horizon-server.exe" "dist/Donorcraft-Windows-x64/"
+          Copy-Item "wasm-std/horizon-wasm-std.wasm" "dist/Donorcraft-Windows-x64/"
+          @"
+          Donorcraft Windows x64 - preliminary native build
+
+          This artifact contains the native Rust game executable and companion tools.
+          It is not yet a ready-to-play installer: Minecraft game resources must be
+          prepared locally from a user's own legitimate Minecraft Java Edition copy.
+          No Minecraft-owned assets or game JARs are included in this artifact.
+          "@ | Set-Content "dist/Donorcraft-Windows-x64/BUILD-NOTES.txt"
+
+      - name: Upload preliminary native game build
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: Donorcraft-Game-Windows-x64-Preliminary
+          path: dist/Donorcraft-Windows-x64/
+          if-no-files-found: error
+          retention-days: 14
+
   build-windows-x64:
     name: Build Donorcraft launcher (Windows x64)
     runs-on: windows-latest
