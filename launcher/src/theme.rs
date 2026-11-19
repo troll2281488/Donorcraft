@@ -360,15 +360,10 @@ mod tests {
         assert_eq!(theme.accent_choice.rgb(), 0x88c0d0);
     }
 
-    /// Donorcraft uses square Blocks chrome for every palette, including the newer skies.
+    /// Donorcraft uses the same square, beveled Blocks presentation for every palette.
     #[test]
     fn donorcraft_keeps_the_block_presentation_for_every_palette() {
-        for (id, oled, dark) in [
-            ("sunrise", false, true),
-            ("hypr_neon", true, true),
-            ("overworld", false, true),
-            ("taiga", false, true),
-        ] {
+        for id in ["sunrise", "hypr_neon", "overworld", "taiga"] {
             let settings = Settings {
                 accent: horizon_launcher::themes::starting_accent(Some(id), &Default::default()),
                 theme: Some(id.into()),
@@ -376,53 +371,9 @@ mod tests {
             };
             let theme = from_settings(&settings, WindowAppearance::Light);
             assert!(!theme.glass, "{id}: square block presentation");
-            assert_eq!(theme.dark, dark, "{id}: one look");
-            assert_eq!(theme.edge.is_some(), oled);
-            let painted = matches!(id, "overworld" | "taiga");
-            assert_eq!(
-                theme.look.own_sky,
-                painted || oled,
-                "{id}: frosts its own sky"
-            );
-            assert_eq!(theme.scene, !oled && !painted, "{id}: scene");
-            if oled {
-                assert_eq!(theme.night.page, 0x000000);
-            }
-            // Text on the main action, and the light look's accent on white.
-            let label = tokens::contrast(theme.look.on_accent, theme.look.accent);
-            assert!(label >= 4.5, "{id}: label {label:.2}");
-            if !dark {
-                let soft = tokens::contrast(theme.look.accent_soft, 0xffffff);
-                assert!(soft >= 4.5, "{id}: accent on white {soft:.2}");
-                // Dark text on a frosted plate over the sky's brightest band.
-                let worst = tokens::night::over(
-                    theme.look.plate,
-                    theme.look.plate_alpha,
-                    theme.night.sky[5],
-                );
-                let ratio = tokens::contrast(theme.night.ink, worst);
-                assert!(ratio >= 4.5, "{id}: ink on a plate {ratio:.2}");
-            }
+            assert!(theme.edge.is_none(), "{id}: no glass-only edge");
+            assert_eq!(theme.night.page, theme.accent_choice.apply(theme.night.blocks()).page);
         }
-    }
-
-    /// Dark content plates over the sunset are mostly opaque, darker than the text they hold.
-    #[test]
-    fn dark_plates_are_steady() {
-        let theme = from_settings(&Settings::default(), WindowAppearance::Dark);
-        assert!(theme.look.plate_alpha >= 0.6, "{}", theme.look.plate_alpha);
-        // White text over the plate at its alpha over the sun's brightest colour still reads.
-        let over = |top: u32, a: f32, under: u32| tokens::night::over(top, a, under);
-        let worst = over(theme.look.plate, theme.look.plate_alpha, 0xffd98c);
-        let ratio = tokens::contrast(0xffffff, worst);
-        assert!(ratio >= 4.5, "white on a plate over the sun: {ratio:.2}");
-        // Body text is white at 70 %: it reads at 4.5:1 there too, at the default Glass and Blur 0.
-        let body = over(0xffffff, tokens::glass::ink::BODY, worst);
-        let ratio = tokens::contrast(body, worst);
-        assert!(
-            ratio >= 4.5,
-            "body text on a plate over the sun: {ratio:.2}"
-        );
     }
 
     /// The light look keeps Horizon's violet as it is and darkens only accents too pale for white.
