@@ -158,7 +158,15 @@ pub fn from_settings(settings: &Settings, system: WindowAppearance) -> Theme {
         theme.night.art.mood = night::Mood::Plain;
         theme.look.own_sky = false;
     }
-    theme.with_glass(settings.glass_tint(), settings.glass_blur())
+    // Donorcraft keeps the launcher in the Minecraft-like Blocks presentation:
+    // square panels, beveled buttons and the pixel face. Preserve the selected palette,
+    // but do not turn the launcher back into Horizon's rounded glass presentation.
+    let theme = theme.with_glass(settings.glass_tint(), settings.glass_blur());
+    Theme::from(
+        theme.accent_choice.apply(theme.night.blocks()),
+        theme.night,
+        theme.accent_choice,
+    )
 }
 
 impl Theme {
@@ -352,11 +360,9 @@ mod tests {
         assert_eq!(theme.accent_choice.rgb(), 0x88c0d0);
     }
 
-    /// Every theme keeps Horizon's glass pages (so no page changes how it works) in its one
-    /// look: Hypr's plates frost its black night with an edge, the painted ones their own sky,
-    /// Taiga a snowy blue hour.
+    /// Donorcraft uses square Blocks chrome for every palette, including the newer skies.
     #[test]
-    fn the_new_families_keep_the_glass_pages() {
+    fn donorcraft_keeps_the_block_presentation_for_every_palette() {
         for (id, oled, dark) in [
             ("sunrise", false, true),
             ("hypr_neon", true, true),
@@ -369,7 +375,7 @@ mod tests {
                 ..Settings::default()
             };
             let theme = from_settings(&settings, WindowAppearance::Light);
-            assert!(theme.glass, "{id}: glass pages");
+            assert!(!theme.glass, "{id}: square block presentation");
             assert_eq!(theme.dark, dark, "{id}: one look");
             assert_eq!(theme.edge.is_some(), oled);
             let painted = matches!(id, "overworld" | "taiga");
