@@ -9,6 +9,7 @@ on:
       - 'crates/horizon-*/**'
       - 'packaging/icons/**'
       - 'packaging/windows/**'
+      - 'tools/ci/rust-version'
       - '.github/workflows/donorcraft-windows.yml'
 
 permissions:
