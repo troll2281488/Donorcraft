@@ -20,8 +20,36 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  build-wasm-std:
+    name: Build shared WebAssembly standard library
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install pinned Rust and wasm target
+        uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec
+        with:
+          toolchain: '1.99.1'
+          components: rust-src
+          targets: wasm32-unknown-unknown
+      - name: Build shared wasm standard library
+        run: |
+          mkdir -p wasm-std
+          cargo run --locked -p cargo-horizon-mod -- wasm-std wasm-std/horizon-wasm-std.wasm
+      - name: Upload shared wasm standard library
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: Donorcraft-wasm-std
+          path: wasm-std/horizon-wasm-std.wasm
+          if-no-files-found: error
+          retention-days: 3
+
   build-game-windows-x64:
     name: Build Donorcraft game client (Windows x64)
+    needs: build-wasm-std
     runs-on: windows-latest
     timeout-minutes: 90
     env:
@@ -40,12 +68,10 @@ jobs:
         run: |
           "version=$(Get-Content tools/ci/rust-version -Raw | ForEach-Object { $_.Trim() })" >> $env:GITHUB_OUTPUT
 
-      - name: Install Rust and wasm target
+      - name: Install pinned Rust
         uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec
         with:
           toolchain: ${{ steps.rust.outputs.version }}
-          components: rust-src
-          targets: wasm32-unknown-unknown
 
       - name: Cache Rust dependencies
         uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
@@ -55,11 +81,11 @@ jobs:
       - name: Build native Donorcraft game and companion tools
         run: cargo build --release --locked -p horizon-official --bin horizon-official -p horizon-client-lib --bin horizon-ctl -p horizon-prepare --bin horizon-prepare -p horizon-server --bin horizon-server
 
-      - name: Build shared WebAssembly standard library
-        run: |
-          New-Item -ItemType Directory -Force wasm-std | Out-Null
-          cargo run --locked -p cargo-horizon-mod -- wasm-std wasm-std/horizon-wasm-std.wasm
-        shell: pwsh
+      - name: Download shared WebAssembly standard library
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: Donorcraft-wasm-std
+          path: wasm-std
 
       - name: Prepare game executable and verify outputs
         shell: pwsh
