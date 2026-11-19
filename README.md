@@ -11,6 +11,7 @@
 </p>
 
 <p align="center">
+  <a href="FIRST-LAUNCH.md"><b>First launch on Windows</b></a> ·
   <a href="PLAY-WITH-A-FRIEND.md"><b>Play with a friend</b></a> ·
   <a href="cloud/README.md"><b>Cloud roadmap</b></a> ·
   <a href="https://playhorizon.dev/docs/install"><b>Upstream install guide</b></a> ·
