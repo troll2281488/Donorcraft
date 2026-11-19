@@ -1,17 +1,12 @@
+# Donorcraft
+
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/media/readme/title-dark.png">
-    <img src="docs/media/readme/title-light.png" alt="Horizon" width="320">
-  </picture>
+  <b>A Rust-based Minecraft: Java Edition compatible game project.</b><br>
+  Donorcraft is a community rebrand and independent build based on the open-source Horizon project.
 </p>
 
 <p align="center">
-  <b>Minecraft: Java Edition 26.3, rewritten from scratch in Rust.</b><br>
-  It opens your worlds, generates the same terrain and plays by the same rules, without Java.
-</p>
-
-<p align="center">
-  <a href="https://playhorizon.dev/download"><img src="docs/media/readme/download-button.png" alt="Download the Horizon launcher for Windows, macOS and Linux" width="400"></a><br>
+  <a href="https://playhorizon.dev/download"><img src="docs/media/readme/download-button.png" alt="Donorcraft launcher download" width="400"></a><br>
   <sub>You need your own copy of Minecraft: Java Edition.</sub>
 </p>
 
@@ -48,7 +43,7 @@ The dedicated server is measured too: in a four-thread server run, Horizon avera
 - **Your own copy of Minecraft: Java Edition.** Horizon ships no Minecraft files. It builds them from the game you bought, so install version 26.3 and start it once.
 - **Windows, macOS or Linux:** Windows on x64 or ARM64, macOS 12 or later, Linux on x86-64.
 
-<h2 align="center">Made by the Horizon Team</h2>
+<h2 align="center">Based on Horizon</h2>
 
 <table align="center">
   <tr>
@@ -78,6 +73,6 @@ The dedicated server is measured too: in a four-thread server run, Horizon avera
   <a href="https://github.com/sponsors/ludovic111"><b>Sponsor</b></a>
 </p>
 
-<sub>Horizon is released under the [GNU LGPL, version 3 or later](LICENSE), for the project's original work. Code merged before the move from MIT stays available under the [MIT licence](LICENSES/MIT.txt). Dependencies keep their own licences, see the [notices](THIRD_PARTY_NOTICES.md). Founded by [Ludovic Marie](https://lu4ovic.com) and built by the Horizon Team and [its contributors](https://github.com/horizon-rust/horizon/graphs/contributors). You can support it on [GitHub Sponsors](https://github.com/sponsors/ludovic111).</sub>
+<sub>Donorcraft includes and is based on Horizon, which is released under the [GNU LGPL, version 3 or later](LICENSE), for the project's original work. Code merged before the move from MIT stays available under the [MIT licence](LICENSES/MIT.txt). Dependencies keep their own licences, see the [notices](THIRD_PARTY_NOTICES.md). Founded by [Ludovic Marie](https://lu4ovic.com) and built by the Horizon Team and [its contributors](https://github.com/horizon-rust/horizon/graphs/contributors). You can support it on [GitHub Sponsors](https://github.com/sponsors/ludovic111).</sub>
 
 <sub>NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT. Minecraft is a trademark of Mojang Synergies AB; its code and assets belong to Mojang and Microsoft under the [Minecraft EULA](https://www.minecraft.net/en-us/eula).</sub>
