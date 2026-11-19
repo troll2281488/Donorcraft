@@ -1,42 +1,48 @@
-# Donorcraft accounts — authentication plan
+# Donorcraft accounts — username and password
 
-This document defines the account flow before it is connected to the launcher. It does not create accounts or enable sign-in yet.
+## Player experience
 
-## Desired player experience
+Registration and sign-in use only:
+- a unique username (login);
+- a password.
 
-Players should be able to sign in with a username and password, without needing a Microsoft account. The public username is a nickname; it is not a password and must be unique if the product promises unique names.
+No email address and no Microsoft account are required. The player never has to see or manually handle Firebase tokens.
 
-## Safe implementation choices
+## Authentication design
 
-### Option A — Firebase email/password (simplest first release)
+A small trusted authentication API will:
+1. accept registration with username and password over HTTPS;
+2. validate and normalize usernames and enforce uniqueness;
+3. hash passwords with Argon2id and a unique random salt;
+4. verify passwords on sign-in with constant-time password-hash verification;
+5. rate-limit registration and login attempts and return generic errors that do not reveal whether a username exists;
+6. issue a short-lived signed session credential to the Donorcraft client and support safe refresh/revocation.
 
-- Firebase Authentication creates and verifies the account and handles password storage.
-- The launcher asks for an email and password; a separate nickname is stored in `users/{uid}`.
-- Firebase returns the authenticated UID. Firestore rules use that UID to protect profiles and worlds.
-- The app never writes passwords to Firestore, Cloud Storage, logs, crash reports, or source files.
+The desktop client sends credentials only over HTTPS. Passwords must never be stored in Firestore, Cloud Storage, client configuration, logs, or source control. Password hashes and authentication secrets must not be readable by clients.
 
-This option is the easiest to ship, but it requires an email address and therefore is not a pure username-only login.
+## Firebase integration
 
-### Option B — username/password without email
+Firebase remains responsible for profile/world metadata and Cloud Storage, not for the username/password form itself. The trusted backend can authorize access to Firebase-owned resources using server-side credentials and/or exchange its verified session for Firebase Custom Auth credentials where Firebase client SDK access is needed. These credentials are an internal implementation detail; players do not enter or copy them.
 
-A trusted backend must own the username-to-account mapping and authenticate the password. It must use a reputable password-hashing scheme (for example Argon2id with per-account salts), rate-limit login attempts, protect sessions, and provide a safe account-recovery plan. The desktop client must send credentials only over TLS to that backend.
+A Firebase service-account private key must remain on the backend and must never be embedded in the launcher or committed to Git.
 
-Do not implement this by storing plaintext passwords, reversible-encrypted passwords, or password hashes in a client-readable Firestore collection. Do not put a privileged Firebase service-account key in the launcher.
+## Account fields
 
-## Data boundary
+- username: unique login, 3–24 characters, case-insensitive uniqueness;
+- password: accepted at registration, stored only as an Argon2id hash on the trusted backend;
+- nickname: public display name, may be the same as username initially;
+- uid: stable internal account identifier, not chosen by the client.
 
-- Firebase Authentication (or a dedicated trusted auth service) owns credentials.
-- Firestore `users/{uid}` stores only public/profile metadata such as nickname and avatar reference.
-- The existing Firestore rules reject extra profile fields such as `password`.
-- World ownership is tied to the authenticated UID, never to a nickname supplied by the client.
-- Join codes are generated, rate-limited, revocable, and checked by the trusted backend; clients cannot read or write the `joinCodes` or `serverSessions` collections directly.
+## Account recovery
+
+Because there is no email address, password recovery cannot be automatic by email. The product needs an explicit recovery approach (for example, recovery codes shown once at registration or a carefully designed support flow). Never promise recovery until implemented.
 
 ## Current implementation status
 
-- Firestore profile rules and emulator tests: present; the GitHub Actions emulator test run passed.
-- Firebase project and Authentication provider: not configured.
-- Launcher registration/login screens and token handling: not implemented.
-- Username-only authentication backend: not implemented.
-- Account recovery, abuse/rate limits, and production monitoring: not implemented.
+- Firestore profile/world rules and emulator tests: present.
+- Username/password registration API: not implemented.
+- Argon2id credential database and session management: not implemented.
+- Launcher registration/login UI: not implemented.
+- Firebase profile integration and cloud world backend: not implemented.
 
-The first practical release should use Option A unless a username-only login is an absolute requirement. Never ask a player to send a password to support or store it in a world/profile document.
+This document is the target design, not a claim that registration is already working.
