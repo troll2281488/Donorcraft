@@ -3832,7 +3832,7 @@ pub fn stage_update(release: &Release, progress: impl Fn(f32)) -> Result<Option<
     {
         return Ok(None);
     }
-    let sha256 = signed_digest(&release.tag, launcher_asset().unwrap_or_default())?;
+    let sha256 = signed_digest(REPO, &release.tag, launcher_asset().unwrap_or_default())?;
     let work = update_work_dir();
     remove_abandoned_stages(&work, std::time::SystemTime::now(), process_alive);
     let stage = new_stage_folder(&work)?;
@@ -5382,7 +5382,7 @@ pub fn {f}("
             {"tag_name": "launcher@0.30.0", "assets": [asset(x64)]},
             {"tag_name": "launcher@0.29.0", "assets": [asset(x64), asset(arm)]},
         ]);
-        let releases = parse_releases(&list, Some(arm), is_launcher_tag);
+        let releases = parse_releases(&list, Some(arm), REPO, is_launcher_tag);
         assert!(launcher_update_from(&releases, "launcher@0.29.0").is_none());
         let update = launcher_update_from(&releases, "launcher@0.28.0").unwrap();
         assert_eq!(update.tag, "launcher@0.29.0");
@@ -5556,12 +5556,12 @@ pub fn {f}("
             {"tag_name": "v2026.10.13", "assets": []},
             {"tag_name": "launcher-v0.0.1", "draft": true, "assets": []},
         ]);
-        let game: Vec<_> = parse_releases(&list, ASSET, is_game_tag)
+        let game: Vec<_> = parse_releases(&list, ASSET, GAME_REPO, is_game_tag)
             .into_iter()
             .map(|r| r.tag)
             .collect();
         assert_eq!(game, ["v2026.10.13", "v2026.10.12"]);
-        let launcher: Vec<_> = parse_releases(&list, LAUNCHER_ASSET, is_launcher_tag)
+        let launcher: Vec<_> = parse_releases(&list, LAUNCHER_ASSET, REPO, is_launcher_tag)
             .into_iter()
             .map(|r| r.tag)
             .collect();
@@ -5578,7 +5578,7 @@ pub fn {f}("
             {"tag_name": "v2026.10.15", "assets": [{"name": asset, "browser_download_url": "good", "size": 1}]},
             {"tag_name": "v2026.10.14", "assets": [{"name": asset, "browser_download_url": "old", "size": 1}]},
         ]);
-        let releases = parse_releases(&list, Some(asset), is_game_tag);
+        let releases = parse_releases(&list, Some(asset), GAME_REPO, is_game_tag);
         assert!(releases.iter().all(|r| r.tag != "v2026.10.15.1"));
         assert_eq!(
             latest(&releases).map(|r| r.tag.as_str()),
