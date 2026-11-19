@@ -9,6 +9,11 @@ use horizon_release_sign::{Channel, PublicKey, SIGNATURE, SIGNATURE_V2, SUMS};
 
 /// Where a release's attached file downloads from (GitHub's fixed address for it).
 pub fn asset_url(tag: &str, name: &str) -> String {
+    asset_url_for(REPO, tag, name)
+}
+
+/// The fixed download address for a release from the named repository.
+pub fn asset_url_for(repo: &str, tag: &str, name: &str) -> String {
     // Metadata supplies path components, never URL syntax or another repository.
     let component = |text: &str| -> String {
         text.bytes()
@@ -21,7 +26,7 @@ pub fn asset_url(tag: &str, name: &str) -> String {
             .collect()
     };
     format!(
-        "https://github.com/{REPO}/releases/download/{}/{}",
+        "https://github.com/{repo}/releases/download/{}/{}",
         component(tag),
         component(name)
     )
@@ -36,11 +41,22 @@ pub fn digest(
     keys: &[PublicKey],
     fetch: impl Fn(&str) -> Result<Option<Vec<u8>>, String>,
 ) -> Result<String, String> {
-    if let Some(hex) = horizon_release_sign::legacy_digest_for(REPO, tag, asset) {
+    digest_for(REPO, tag, asset, keys, fetch)
+}
+
+/// Checks a signed or legacy archive published by a specific repository.
+pub fn digest_for(
+    repo: &str,
+    tag: &str,
+    asset: &str,
+    keys: &[PublicKey],
+    fetch: impl Fn(&str) -> Result<Option<Vec<u8>>, String>,
+) -> Result<String, String> {
+    if let Some(hex) = horizon_release_sign::legacy_digest_for(repo, tag, asset) {
         return Ok(hex.to_owned());
     }
-    let sums = fetch(&asset_url(tag, SUMS))?;
-    let signature = fetch(&asset_url(tag, SIGNATURE))?
+    let sums = fetch(&asset_url_for(repo, tag, SUMS))?;
+    let signature = fetch(&asset_url_for(repo, tag, SIGNATURE))?
         .map(|bytes| String::from_utf8_lossy(&bytes).into_owned());
     horizon_release_sign::signed_digest(tag, asset, sums.as_deref(), signature.as_deref(), keys)
 }
@@ -68,9 +84,21 @@ pub fn build_digest(
     keys: &[PublicKey],
     fetch: impl Fn(&str) -> Result<Option<Vec<u8>>, String>,
 ) -> Result<String, String> {
+    build_digest_for(REPO, tag, version, asset, keys, fetch)
+}
+
+/// Checks a Nightly or snapshot published by a specific repository.
+pub fn build_digest_for(
+    repo: &str,
+    tag: &str,
+    version: &str,
+    asset: &str,
+    keys: &[PublicKey],
+    fetch: impl Fn(&str) -> Result<Option<Vec<u8>>, String>,
+) -> Result<String, String> {
     let channel = Channel::of(tag).ok_or_else(|| format!("{tag} is not a Horizon release."))?;
-    let sums = fetch(&asset_url(tag, SUMS))?;
-    let signature = fetch(&asset_url(tag, SIGNATURE_V2))?
+    let sums = fetch(&asset_url_for(repo, tag, SUMS))?;
+    let signature = fetch(&asset_url_for(repo, tag, SIGNATURE_V2))?
         .map(|bytes| String::from_utf8_lossy(&bytes).into_owned());
     horizon_release_sign::build_digest(
         channel,
