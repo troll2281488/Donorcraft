@@ -1,6 +1,6 @@
 # Donorcraft: игра с другом
 
-Donorcraft uses Horizon's built-in **Play with Friends** system. It does not require a rented Minecraft server or a Firebase game server.
+Donorcraft uses Horizon's built-in **Play with Friends** system. It does not require a rented Minecraft server or a Firebase game server. The launcher currently installs signed game builds from the upstream Horizon Releases repository; this fork does not yet publish a separate Donorcraft game binary.
 
 ## Before starting
 
@@ -32,16 +32,29 @@ Try these in order:
 
 Do not disable the Windows firewall globally or share your invite code publicly. If Windows asks to allow Donorcraft through the firewall, allow it only on the network profile you trust.
 
-## Important current limitations
+## Если у друга очень слабый интернет
+
+Система сначала пытается соединиться напрямую по адресам из приглашения, а при наличии настроенного relay может автоматически перейти на него. Relay помогает пройти сложный NAT/CGNAT, но не ускоряет интернет и не устраняет высокий ping. По технической документации Horizon, передача через relay обычно занимает около 10–50 КБ/с во время обычной игры, а при быстром открытии новой местности может кратковременно вырасти до нескольких сотен КБ/с; скорость ограничивается на уровне сессии.
+
+Чтобы повысить шанс стабильной игры:
+
+- Если слабый интернет у гостя, пусть именно гость закроет фоновые загрузки, облачную синхронизацию и видео.
+- Если слабый интернет у хоста, по возможности пусть мир откроет игрок с более стабильной исходящей скоростью: хост отправляет игровые данные гостю.
+- Подключите ПК кабелем Ethernet, если возможно; при Wi‑Fi используйте сеть 5 ГГц рядом с роутером.
+- Начните с одного гостя и небольшого расстояния прорисовки; не летайте быстро по совершенно новой местности во время проверки соединения.
+- Если прямое соединение не устанавливается, используйте приватную VPN-сеть или свой relay. Публичный Donorcraft relay пока не предоставляется.
+- Если соединение всё равно тормозит, это ограничение канала/задержки, а не настройка лаунчера. Нельзя обещать игру без лагов при любом качестве интернета.
+
+## Важное ограничение для первого запуска
 
 - The host's computer must remain on and the shared world must stay open during play. This is peer-hosted multiplayer, not an always-online cloud world.
 - Firebase currently provides only the repository's initial configuration/rules. Firebase accounts, cloud snapshots, world wake/sleep, and a hosted server controller are not implemented yet.
-- The Windows CI game package is preliminary until the complete upstream exporter/resource preparation pipeline is available and the game is successfully launched and tested on Windows.
+- The fork's Windows CI game package is preliminary and must not be used as a playable release. Use the signed upstream game build offered by the launcher.
 - A relay binary is a tool, not a hosted service. No public Donorcraft relay endpoint is currently promised.
 
 See the upstream technical explanation in [Play with friends](docs/play-with-friends.md).
 
 
-## What is not ready yet
+## Что ещё не готово
 
-This guide describes the upstream Horizon feature and intended Donorcraft flow. It is not a claim that a playable Donorcraft release is available: the current Windows workflow labels its game output preliminary/compile-only until the original-exporter and resource preparation pipeline is complete and a real Windows launch test passes. Check the repository's GitHub Releases before expecting an installable game.
+Отдельный игровой бинарник Donorcraft и собственный публичный relay ещё не опубликованы. Лаунчер использует подписанные сборки Horizon; сначала проверьте одиночный запуск, затем тестируйте приглашение другу.
