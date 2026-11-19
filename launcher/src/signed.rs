@@ -4,12 +4,12 @@
 //! with the SHA-256 pinned for it in legacy-releases.txt (a rollback). Anything else is refused
 //! with a message saying why.
 
-use crate::backend::REPO;
+use crate::backend::GAME_REPO;
 use horizon_release_sign::{Channel, PublicKey, SIGNATURE, SIGNATURE_V2, SUMS};
 
 /// Where a release's attached file downloads from (GitHub's fixed address for it).
 pub fn asset_url(tag: &str, name: &str) -> String {
-    asset_url_for(REPO, tag, name)
+    asset_url_for(GAME_REPO, tag, name)
 }
 
 /// The fixed download address for a release from the named repository.
@@ -41,7 +41,7 @@ pub fn digest(
     keys: &[PublicKey],
     fetch: impl Fn(&str) -> Result<Option<Vec<u8>>, String>,
 ) -> Result<String, String> {
-    digest_for(REPO, tag, asset, keys, fetch)
+    digest_for(GAME_REPO, tag, asset, keys, fetch)
 }
 
 /// Checks a signed or legacy archive published by a specific repository.
@@ -84,7 +84,7 @@ pub fn build_digest(
     keys: &[PublicKey],
     fetch: impl Fn(&str) -> Result<Option<Vec<u8>>, String>,
 ) -> Result<String, String> {
-    build_digest_for(REPO, tag, version, asset, keys, fetch)
+    build_digest_for(GAME_REPO, tag, version, asset, keys, fetch)
 }
 
 /// Checks a Nightly or snapshot published by a specific repository.
