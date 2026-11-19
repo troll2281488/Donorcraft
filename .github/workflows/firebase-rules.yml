@@ -1,0 +1,47 @@
+name: Donorcraft Firebase rules
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'firebase.json'
+      - 'firestore.rules'
+      - 'storage.rules'
+      - '.github/workflows/firebase-rules.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: donorcraft-firebase-rules
+  cancel-in-progress: false
+
+jobs:
+  validate-rules:
+    name: Compile Firestore and Storage rules
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Java for Firebase emulators
+        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.1.0
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+
+      - name: Compile rules with Firebase emulators
+        run: |
+          npx --yes firebase-tools@14.22.0 emulators:exec \
+            --project demo-donorcraft \
+            --only firestore,storage \
+            "echo Firebase rules loaded successfully"
