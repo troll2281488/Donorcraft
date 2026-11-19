@@ -11,6 +11,8 @@
 </p>
 
 <p align="center">
+  <a href="PLAY-WITH-A-FRIEND.md"><b>Play with a friend</b></a> ·
+  <a href="cloud/README.md"><b>Cloud roadmap</b></a> ·
   <a href="https://playhorizon.dev/docs/install"><b>Upstream install guide</b></a> ·
   <a href="https://playhorizon.dev/docs/"><b>Upstream docs</b></a> ·
   <a href="https://playhorizon.dev/mods"><b>Upstream mods</b></a> ·
