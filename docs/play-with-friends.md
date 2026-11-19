@@ -88,6 +88,23 @@ port by hand** works without a new code. A guest that can't reach any endpoint i
 your friend's game. Ask them to read the note under their code: they may need UPnP on their router, a
 forwarded port, a relay or a VPN."
 
+## Playing over a weak or unstable connection
+
+The tunnel can make a connection possible when direct routing fails, but it cannot create bandwidth or remove latency. The guest races the invite's direct endpoints; if a relay is included and direct connection fails, the guest can fall back to that relay. When a relay session is established, the implementation also tries to settle onto a direct path when possible.
+
+The documented relay traffic is about **10–50 KB/s in ordinary play**, with brief bursts of a few hundred KB/s while moving quickly into unexplored terrain. The relay applies per-session traffic limits. This is a useful low-bandwidth target, not a guarantee: packet loss, high round-trip time, overloaded Wi-Fi, or a very slow host upload can still cause lag or disconnects.
+
+For the best chance with a weak connection:
+
+- Prefer the player with the more reliable upload connection as the host. The host streams the shared world's state to guests.
+- Use Ethernet where possible; otherwise keep both PCs close to their Wi-Fi access points.
+- Close cloud sync, video streams, game downloads and other uploads/downloads on both PCs.
+- Test with one guest first. Avoid rapidly exploring large new areas during the first connection test.
+- If direct connectivity fails because of NAT/CGNAT, use a private VPN or configure a relay reachable by both players. A relay only changes the route; it does not make a slow internet connection faster.
+- There is no public Horizon/Donorcraft relay endpoint promised by this project. Someone must run `horizon-relay` on a machine with a reachable TCP port and configure that address in the game's Relay setting.
+
+There is currently no promise of seamless reconnect after a complete connection loss. If the tunnel closes, the players may need to reconnect with a fresh invite.
+
 ## Encryption
 
 The code's secret never leaves the code. Every session runs a password-authenticated key exchange
