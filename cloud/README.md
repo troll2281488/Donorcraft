@@ -14,7 +14,7 @@ This directory documents the planned cloud-world service. The Firebase rules in 
 
 The world must be simulated by a real game server process. Firestore, Realtime Database, and Cloud Storage are not game servers and cannot run the game tick.
 
-## Firebase responsibilities
+Account design and the username/password trade-offs are documented in [AUTHENTICATION.md](AUTHENTICATION.md).\n\n## Firebase responsibilities
 
 - **Authentication:** account registration and sign-in. Passwords must never be stored in Firestore or this repository.
 - **Firestore:** private profile and world metadata. Join codes and server sessions are deliberately denied to direct client access; a trusted backend must validate and manage them.
