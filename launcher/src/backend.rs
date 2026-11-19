@@ -12,6 +12,8 @@ use std::sync::{Arc, Mutex};
 
 /// Authority for game, launcher and native SDK release reads on this fork.
 pub const REPO: &str = "troll2281488/Donorcraft";
+/// Upstream repository that publishes the playable Horizon game builds used by this launcher.
+pub const GAME_REPO: &str = "horizon-rust/horizon";
 
 /// Where a crash is reported.
 pub fn issues_url() -> String {
@@ -656,7 +658,7 @@ fn release_list() -> Result<serde_json::Value, String> {
 }
 
 fn release_list_url() -> String {
-    format!("https://api.github.com/repos/{REPO}/releases?per_page=100")
+    format!("https://api.github.com/repos/{GAME_REPO}/releases?per_page=100")
 }
 
 /// The game's builds as GitHub (or its mirror) lists them now, never from a copy kept on disk.
@@ -671,6 +673,7 @@ pub fn releases_from_network() -> Result<Vec<Release>, String> {
 pub(crate) fn parse_releases(
     list: &serde_json::Value,
     asset: Option<&str>,
+    repo: &str,
     keep: fn(&str) -> bool,
 ) -> Vec<Release> {
     let mut out = Vec::new();
@@ -682,7 +685,7 @@ pub(crate) fn parse_releases(
         let found = r["assets"].as_array().into_iter().flatten().find_map(|a| {
             let name = a["name"].as_str()?;
             (Some(name) == asset)
-                .then(|| Some((crate::signed::asset_url(tag, name), a["size"].as_u64()?)))?
+                .then(|| Some((crate::signed::asset_url_for(repo, tag, name), a["size"].as_u64()?)))?
         });
         out.push(Release {
             tag: tag.into(),
@@ -743,10 +746,10 @@ fn game_releases_with(
     fallback: Option<&str>,
 ) -> Vec<Release> {
     let keep = |tag: &str| is_game_tag(tag) || horizon_release_sign::is_nightly(tag);
-    let mut out = parse_releases(list, asset, keep);
+    let mut out = parse_releases(list, asset, GAME_REPO, keep);
     if fallback.is_some() {
         // The same releases in the same order: only the asset looked for differs.
-        for (r, other) in out.iter_mut().zip(parse_releases(list, fallback, keep)) {
+        for (r, other) in out.iter_mut().zip(parse_releases(list, fallback, GAME_REPO, keep)) {
             if r.asset.is_none() && r.tag == other.tag {
                 r.asset = other.asset;
             }
@@ -777,7 +780,7 @@ fn launcher_releases_in_with(
     list: &serde_json::Value,
     json: impl Fn(String) -> Result<Option<serde_json::Value>, String>,
 ) -> Vec<Release> {
-    let found = parse_releases(list, launcher_asset(), is_launcher_tag);
+    let found = parse_releases(list, launcher_asset(), REPO, is_launcher_tag);
     if found.iter().any(|r| r.asset.is_some()) {
         return found;
     }
@@ -796,6 +799,7 @@ fn launcher_releases_in_with(
             let one = parse_releases(
                 &serde_json::json!([release]),
                 launcher_asset(),
+                REPO,
                 is_launcher_tag,
             );
             if one.iter().any(|r| r.asset.is_some()) {
@@ -1064,11 +1068,12 @@ pub(crate) fn fetch_small(url: &str) -> Result<Option<Vec<u8>>, String> {
 }
 
 /// The SHA-256 the release's signed checksums give for `asset`, or why it must not be installed.
-fn signed_digest(tag: &str, asset: &str) -> Result<String, String> {
-    crate::signed::digest(
+fn signed_digest(repo: &str, tag: &str, asset: &str) -> Result<String, String> {
+    crate::signed::digest_for(
+        repo,
         tag,
         asset,
-        &horizon_release_sign::trusted_keys_for(REPO),
+        &horizon_release_sign::trusted_keys_for(repo),
         fetch_small,
     )
 }
@@ -1189,15 +1194,16 @@ pub fn install(release: &Release, progress: impl Fn(f32)) -> Result<(), String> 
                         &[("title", &format!("{:?}", release.name))],
                     )
                 })?;
-            crate::signed::build_digest(
+            crate::signed::build_digest_for(
+                GAME_REPO,
                 github_tag,
                 &version,
                 asset,
-                &horizon_release_sign::trusted_keys_for(REPO),
+                &horizon_release_sign::trusted_keys_for(GAME_REPO),
                 fetch_small,
             )?
         }
-        None if is_game_tag(tag) => signed_digest(tag, asset)?,
+        None if is_game_tag(tag) => signed_digest(GAME_REPO, tag, asset)?,
         None => return Err(format!("{tag} is not a Horizon release.")),
     };
     install_as(
