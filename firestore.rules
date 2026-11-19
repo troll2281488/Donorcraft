@@ -24,7 +24,8 @@ service cloud.firestore {
       allow read: if owns(uid);
       allow create: if owns(uid)
         && request.resource.data.keys().hasOnly(['nickname', 'createdAt'])
-        && validNickname(request.resource.data);
+        && validNickname(request.resource.data)
+        && request.resource.data.createdAt is timestamp;
       allow update: if owns(uid)
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nickname', 'avatar'])
         && (!('nickname' in request.resource.data) || validNickname(request.resource.data))
@@ -41,12 +42,15 @@ service cloud.firestore {
         && request.resource.data.ownerUid == request.auth.uid
         && request.resource.data.keys().hasOnly(['ownerUid', 'name', 'createdAt', 'updatedAt', 'status'])
         && validWorldName(request.resource.data)
+        && request.resource.data.createdAt is timestamp
+        && (!('updatedAt' in request.resource.data) || request.resource.data.updatedAt is timestamp)
         && validWorldStatus(request.resource.data);
       allow update: if signedIn()
         && resource.data.ownerUid == request.auth.uid
         && request.resource.data.ownerUid == request.auth.uid
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'updatedAt', 'status'])
         && validWorldName(request.resource.data)
+        && (!('updatedAt' in request.resource.data) || request.resource.data.updatedAt is timestamp)
         && validWorldStatus(request.resource.data);
       allow delete: if signedIn() && resource.data.ownerUid == request.auth.uid;
     }
