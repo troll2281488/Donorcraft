@@ -4,17 +4,33 @@ service cloud.firestore {
   match /databases/{database}/documents {
     function signedIn() { return request.auth != null; }
     function owns(uid) { return signedIn() && request.auth.uid == uid; }
+    function validNickname(data) {
+      return data.nickname is string
+        && data.nickname.size() >= 2
+        && data.nickname.size() <= 24;
+    }
+    function validWorldName(data) {
+      return data.name is string
+        && data.name.size() >= 1
+        && data.name.size() <= 48;
+    }
+    function validWorldStatus(data) {
+      return !('status' in data)
+        || data.status in ['stopped', 'starting', 'running', 'saving', 'sleeping', 'error'];
+    }
 
     // Public profile fields only. Firebase Authentication owns credentials.
     match /users/{uid} {
       allow read: if owns(uid);
       allow create: if owns(uid)
         && request.resource.data.keys().hasOnly(['nickname', 'createdAt'])
-        && request.resource.data.nickname is string
-        && request.resource.data.nickname.size() >= 2
-        && request.resource.data.nickname.size() <= 24;
+        && validNickname(request.resource.data);
       allow update: if owns(uid)
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nickname', 'avatar']);
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nickname', 'avatar'])
+        && (!('nickname' in request.resource.data) || validNickname(request.resource.data))
+        && (!('avatar' in request.resource.data)
+          || (request.resource.data.avatar is string
+            && request.resource.data.avatar.size() <= 2048));
       allow delete: if false;
     }
 
@@ -24,13 +40,14 @@ service cloud.firestore {
       allow create: if signedIn()
         && request.resource.data.ownerUid == request.auth.uid
         && request.resource.data.keys().hasOnly(['ownerUid', 'name', 'createdAt', 'updatedAt', 'status'])
-        && request.resource.data.name is string
-        && request.resource.data.name.size() >= 1
-        && request.resource.data.name.size() <= 48;
+        && validWorldName(request.resource.data)
+        && validWorldStatus(request.resource.data);
       allow update: if signedIn()
         && resource.data.ownerUid == request.auth.uid
         && request.resource.data.ownerUid == request.auth.uid
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'updatedAt', 'status']);
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'updatedAt', 'status'])
+        && validWorldName(request.resource.data)
+        && validWorldStatus(request.resource.data);
       allow delete: if signedIn() && resource.data.ownerUid == request.auth.uid;
     }
 
