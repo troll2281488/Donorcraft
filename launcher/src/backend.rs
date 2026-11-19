@@ -5605,7 +5605,7 @@ pub fn {f}("
             {"tag_name": "v0.2.12", "prerelease": true, "assets": [{"name": asset, "browser_download_url": "a", "size": 1}]},
             {"tag_name": "v0.2.0", "assets": [{"name": asset, "browser_download_url": "s", "size": 1}]},
         ]);
-        let releases = parse_releases(&list, Some(asset), is_game_tag);
+        let releases = parse_releases(&list, Some(asset), GAME_REPO, is_game_tag);
         assert_eq!(
             releases.iter().map(|r| r.prerelease).collect::<Vec<_>>(),
             [false, true, false]
